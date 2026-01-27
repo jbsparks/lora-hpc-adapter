@@ -1,0 +1,21 @@
+{
+  "rules": [
+    {
+      "name": "slurm_interactive_basic",
+      "question_contains": "srun command to start an interactive session",
+      "tokens": [
+        "@srun",
+        "@--pty",
+        "@bash",
+        "@-t",
+        "@-c",
+        "@--mem",
+        "@16g",
+        "~-p",
+        "~-a",
+        "~<partition>",
+        "~<account>"
+      ]
+    }
+  ]
+}

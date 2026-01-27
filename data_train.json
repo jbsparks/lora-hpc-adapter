@@ -1,0 +1,118 @@
+[
+  {
+    "instruction": "What is the Slurm srun command to start an interactive session? Give a minimal example and one requesting 4 CPUs and 16GB for 1 hour.",
+    "output": "Use srun with a PTY. Minimal:\n\nsrun --pty bash\n\nWith resources (add site placeholders if needed):\n\nsrun -p <partition> -A <account> -t 01:00:00 -c 4 --mem=16G --pty bash\n\nNotes: some sites require -p/-A; use your site\u2019s partition/account names."
+  },
+  {
+    "instruction": "How do I start an interactive GPU session with Slurm? Provide one example using 1 GPU for 2 hours.",
+    "output": "Example interactive GPU shell:\n\nsrun -p <partition> -A <account> -t 02:00:00 --gres=gpu:1 --pty bash\n\nNotes: GPU partitions and gres names vary by site; adjust -p and --gres accordingly."
+  },
+  {
+    "instruction": "Show a concise Slurm command to list idle nodes by name.",
+    "output": "Use sinfo and filter idle nodes:\n\nsinfo -N -t idle\n\nYou can add -p <partition> to limit to a partition."
+  },
+  {
+    "instruction": "What\u2019s the simplest command to see node states and partitions?",
+    "output": "A quick overview is:\n\nsinfo\n\nFor per-node detail:\n\nsinfo -N"
+  },
+  {
+    "instruction": "Explain how to request 2 nodes with 8 tasks total for 30 minutes using srun.",
+    "output": "Example multi-node run:\n\nsrun -N 2 -n 8 -t 00:30:00 -p <partition> -A <account> ./my_mpi_app\n\nNotes: -N is nodes, -n is total tasks; adjust partition/account placeholders."
+  },
+  {
+    "instruction": "I need an interactive session with 8 CPUs and 32GB for 3 hours. Provide the srun command.",
+    "output": "srun -p <partition> -A <account> -t 03:00:00 -c 8 --mem=32G --pty bash\n\nNotes: partitions/accounts are site-specific."
+  },
+  {
+    "instruction": "What is the difference between scale up vs scale out in HPC? One sentence each.",
+    "output": "Scale up: use a bigger node (more CPUs/GPUs/memory) for a single job.\nScale out: use more nodes in parallel, typically with MPI or distributed frameworks."
+  },
+  {
+    "instruction": "Give a minimal example of salloc followed by srun for an interactive session.",
+    "output": "Example:\n\nsalloc -p <partition> -A <account> -t 01:00:00 -c 4 --mem=8G\nsrun --pty bash\n\nNotes: salloc reserves resources; srun launches the shell inside the allocation."
+  },
+  {
+    "instruction": "How do I check my current Slurm jobs and their states?",
+    "output": "Use squeue for your user:\n\nsqueue -u $USER\n\nAdd -l for more detail if needed."
+  },
+  {
+    "instruction": "Provide a short command to show job details for job 12345.",
+    "output": "Use scontrol show job:\n\nscontrol show job 12345\n\nThis prints the job\u2019s resources, state, and timing."
+  },
+  {
+    "instruction": "Explain the common cause of SSH \u201cPermission denied (publickey)\u201d on a cluster and one fix.",
+    "output": "Cause: your public key isn\u2019t in the remote account\u2019s authorized_keys or the wrong key is offered.\nFix: add the correct public key to ~/.ssh/authorized_keys on the cluster, and/or use ssh -i <keyfile> to select the right key."
+  },
+  {
+    "instruction": "Show a basic sbatch script header for a 10-minute job on 1 node with 4 tasks.",
+    "output": "Example header:\n\n#!/bin/bash\n#SBATCH -p <partition>\n#SBATCH -A <account>\n#SBATCH -N 1\n#SBATCH -n 4\n#SBATCH -t 00:10:00\n\n# your commands here\n\nNotes: partition/account are site-specific."
+  },
+  {
+    "instruction": "What is a concise command to view partition limits (like time limits)?",
+    "output": "Use sinfo -o with a custom format:\n\nsinfo -o \"%P %l %a\"\n\nThis shows partition, time limit, and availability."
+  },
+  {
+    "instruction": "Show how to request 1 node, 1 task, and 64GB memory with srun.",
+    "output": "srun -N 1 -n 1 --mem=64G -p <partition> -A <account> ./my_app\n\nNotes: add -t for time limits if required by your site."
+  },
+  {
+    "instruction": "Give a minimal MPI launch example with srun for 16 ranks.",
+    "output": "srun -n 16 -p <partition> -A <account> ./my_mpi_app\n\nNotes: some sites require -N to control node count."
+  },
+  {
+    "instruction": "How do I list available partitions and their states?",
+    "output": "Use sinfo:\n\nsinfo\n\nAdd -o to customize output (e.g., partition and state)."
+  },
+  {
+    "instruction": "Provide a Slurm example to run a 1-hour job with 4 tasks per node on 2 nodes.",
+    "output": "srun -N 2 --ntasks-per-node=4 -t 01:00:00 -p <partition> -A <account> ./my_app\n\nNotes: placeholders are site-specific."
+  },
+  {
+    "instruction": "What does --pty do in srun?",
+    "output": "--pty allocates a pseudo-terminal so you get an interactive shell (e.g., for srun --pty bash)."
+  },
+  {
+    "instruction": "How do I constrain a job to a specific partition and account? Provide an example.",
+    "output": "Use -p and -A:\n\nsrun -p <partition> -A <account> -t 00:30:00 -n 1 ./my_app\n\nReplace placeholders with your site values."
+  },
+  {
+    "instruction": "Show a concise Spack command to find packages matching \u201chdf5\u201d.",
+    "output": "Use spack find or search:\n\nspack find hdf5\n\nYou can use spack search hdf5 for broader matching."
+  },
+  {
+    "instruction": "How do I use Spack to list installed packages that match two patterns, e.g., mpi and hdf5?",
+    "output": "Use multiple patterns:\n\nspack find mpi hdf5\n\nThis filters installed packages containing either pattern."
+  },
+  {
+    "instruction": "Explain the difference between srun and sbatch in one sentence each.",
+    "output": "srun launches a job step (interactive or within an allocation) and runs immediately.\nsbatch submits a batch script to the scheduler queue."
+  },
+  {
+    "instruction": "Show a minimal command to see node availability for a specific partition.",
+    "output": "sinfo -N -p <partition>\n\nAdd -t idle to limit to idle nodes."
+  },
+  {
+    "instruction": "Provide an srun example that requests 2 GPUs and 4 CPUs for 30 minutes.",
+    "output": "srun -p <partition> -A <account> -t 00:30:00 --gres=gpu:2 -c 4 --pty bash\n\nNotes: adjust --gres and partition per site."
+  },
+  {
+    "instruction": "Context: Sequential to MPI translation.\nCan you parallelize this sequential code to MPI?\n\nint n = 5000;\nfloat sum = 0.0f;\nfloat *x = malloc(n * sizeof(float));\nfloat *y = malloc(n * sizeof(float));\nfor (int i = 0; i < n; i++) {\n    sum += x[i] * y[i];\n}\nfree(x);\nfree(y);",
+    "output": "int size, rank;\nMPI_Init(NULL, NULL);\nMPI_Comm_size(MPI_COMM_WORLD, &size);\nMPI_Comm_rank(MPI_COMM_WORLD, &rank);\nint n = (5000 + size - 1) / size;\nfloat lsum = 0.0f;\nfloat gsum = 0.0f;\nfloat *x = malloc(n * sizeof(float));\nfloat *y = malloc(n * sizeof(float));\nfor (int i = 0; i < n; i++) {\n    lsum += x[i] * y[i];\n}\nMPI_Reduce(&lsum, &gsum, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);\nfree(x);\nfree(y);\nMPI_Finalize();"
+  },
+  {
+    "instruction": "Context: Sequential to MPI translation.\nCan you parallelize this sequential code to MPI?\n\nint n = 500;\nfloat *u = malloc(n * n * sizeof(float));\nfloat *u_new = malloc(n * n * sizeof(float));\nfor (int i = 1; i < n - 1; i++) {\n    for (int j = 1; j < n - 1; j++) {\n        u_new[i * n + j] = 0.25f * (u[(i - 1) * n + j] + u[(i + 1) * n + j] + u[i * n + (j - 1)] + u[i * n + (j + 1)]);\n    }\n}\nfree(u);\nfree(u_new);",
+    "output": "int size, rank;\nMPI_Status status;\nMPI_Init(NULL, NULL);\nMPI_Comm_size(MPI_COMM_WORLD, &size);\nMPI_Comm_rank(MPI_COMM_WORLD, &rank);\nint n = 500;\nint local_n = (n + size - 1) / size + 2;\nfloat *u = malloc(n * local_n * sizeof(float));\nfloat *u_new = malloc(n * local_n * sizeof(float));\nif (rank > 0) {\n    MPI_Send(&u[1 * n], n, MPI_FLOAT, rank - 1, 0, MPI_COMM_WORLD);\n    MPI_Recv(&u[0 * n], n, MPI_FLOAT, rank - 1, 0, MPI_COMM_WORLD, &status);\n}\nif (rank < size - 1) {\n    MPI_Recv(&u[(local_n - 1) * n], n, MPI_FLOAT, rank + 1, 0, MPI_COMM_WORLD, &status);\n    MPI_Send(&u[(local_n - 2) * n], n, MPI_FLOAT, rank + 1, 0, MPI_COMM_WORLD);\n}\nfor (int i = 1; i < local_n - 1; i++) {\n    for (int j = 1; j < n - 1; j++) {\n        u_new[i * n + j] = 0.25f * (u[(i - 1) * n + j] + u[(i + 1) * n + j] + u[i * n + (j - 1)] + u[i * n + (j + 1)]);\n    }\n}\nfree(u);\nfree(u_new);\nMPI_Finalize();"
+  },
+  {
+    "instruction": "Answer with exactly: (1) a minimal srun interactive command, (2) a resource-request example for 4 CPUs, 16GB, 1 hour, (3) a single-line caveat about site-specific -p/-A placeholders. Use fenced code blocks for commands.",
+    "output": "Minimal:\n\n```\nsrun --pty bash\n```\n\nWith resources:\n\n```\nsrun -p <partition> -A <account> -t 01:00:00 -c 4 --mem=16G --pty bash\n```\n\nCaveat: replace -p <partition> and -A <account> with your site values."
+  },
+  {
+    "instruction": "Provide two commands only: a minimal Slurm interactive shell and a 4 CPUs / 16GB / 1 hour example. Then add one caveat line about -p/-A placeholders.",
+    "output": "Minimal:\n\n```\nsrun --pty bash\n```\n\nExample (4 CPUs, 16GB, 1 hour):\n\n```\nsrun -p <partition> -A <account> -t 01:00:00 -c 4 --mem=16G --pty bash\n```\n\nCaveat: -p/-A are site-specific placeholders."
+  },
+  {
+    "instruction": "Question: What is the Slurm srun command to start an interactive session? Give a minimal example and one requesting 4 CPUs and 16GB for 1 hour. Format: exactly two fenced code blocks and one caveat line.",
+    "output": "```\nsrun --pty bash\n```\n\n```\nsrun -p <partition> -A <account> -t 01:00:00 -c 4 --mem=16G --pty bash\n```\n\nCaveat: use your site\u2019s partition/account for -p/-A."
+  }
+]

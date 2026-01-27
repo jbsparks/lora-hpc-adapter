@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+
+# Generated artifacts
+baseline.txt
+tuned.txt
+judge.json
+*.out
+*.log
+
+# LoRA/adapter outputs
+codellama-hpc-lora/
+lora-tiny/
+checkpoint-*/
