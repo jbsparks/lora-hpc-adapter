@@ -27,6 +27,8 @@ Return JSON only in this exact schema:
   "issues_a": ["..."],
   "issues_b": ["..."]
 }
+
+Only output valid JSON. Do not include extra text, markdown, or repeated answers.
 """
 
 
@@ -97,11 +99,16 @@ def main() -> None:
     parser.add_argument("question", help="Original question")
     parser.add_argument("answer_a", help="Baseline answer")
     parser.add_argument("answer_b", help="Tuned answer")
-    parser.add_argument("--max-new-tokens", type=int, default=256)
+    parser.add_argument("--max-new-tokens", type=int, default=512)
     parser.add_argument("--min-new-tokens", type=int, default=0)
     parser.add_argument("--debug", action="store_true", help="Enable verbose logging")
     parser.add_argument("--local-files-only", action="store_true", help="Do not attempt to download models")
-    parser.add_argument("--use-chat-template", action="store_true", help="Use tokenizer chat template for prompt")
+    parser.add_argument(
+        "--use-chat-template",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Use tokenizer chat template for prompt (default: enabled)",
+    )
     parser.add_argument("--no-eos", action="store_true", help="Do not use eos_token_id to stop generation")
     parser.add_argument("--stream", action="store_true", help="Stream generated tokens to stdout")
     parser.add_argument("--rule-check", action="store_true", help="Apply deterministic rule checks")
@@ -191,6 +198,39 @@ def main() -> None:
     if args.debug:
         logging.info("Generated tokens=%d", generated_ids.shape[0])
         logging.info("Decoded chars=%d", len(response))
+
+    if not response:
+        # Fallback: some models immediately emit EOS for judge prompts.
+        retry_kwargs = dict(gen_kwargs)
+        retry_kwargs["eos_token_id"] = None
+        retry_min = max(args.min_new_tokens, 16)
+        retry_kwargs["min_new_tokens"] = retry_min
+        retry_kwargs["min_length"] = input_len + retry_min
+        if args.debug:
+            logging.info("Empty judge response; retrying with no_eos and min_new_tokens=%d", retry_min)
+        if args.stream:
+            streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
+            retry_kwargs["streamer"] = streamer
+            result_holder = {}
+
+            def _run_generate_retry():
+                result_holder["ids"] = model.generate(**retry_kwargs)
+
+            with torch.no_grad():
+                gen_thread = threading.Thread(target=_run_generate_retry)
+                gen_thread.start()
+                for chunk in streamer:
+                    print(chunk, end="", flush=True)
+                gen_thread.join()
+            output_ids = result_holder.get("ids")
+        else:
+            with torch.no_grad():
+                output_ids = model.generate(**retry_kwargs)
+        generated_ids = output_ids[0][input_len:] if output_ids is not None else torch.tensor([])
+        response = tokenizer.decode(generated_ids, skip_special_tokens=True).strip()
+        if args.debug:
+            logging.info("Retry generated tokens=%d", generated_ids.shape[0])
+            logging.info("Retry decoded chars=%d", len(response))
     response = extract_json(response)
 
     try:

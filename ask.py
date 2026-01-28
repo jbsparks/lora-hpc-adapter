@@ -67,7 +67,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run baseline inference.")
     parser.add_argument("model_id", help="Base model id or path, e.g. codellama/CodeLlama-7b-Instruct-hf")
     parser.add_argument("question", help="User question/prompt")
-    parser.add_argument("--max-new-tokens", type=int, default=256)
+    parser.add_argument("--max-new-tokens", type=int, default=512)
     parser.add_argument("--min-new-tokens", type=int, default=0, help="Force at least N tokens before stopping")
     parser.add_argument("--use-4bit", action="store_true", help="Load model in 4-bit (requires bitsandbytes)")
     parser.add_argument("--debug", action="store_true", help="Enable verbose logging")

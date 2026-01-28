@@ -12,6 +12,18 @@ This is meant to be a demo artifact (clear narrative + reproducible steps), not 
 
 ---
 
+## What LoRA is (and why we use it here)
+**LoRA (Low-Rank Adaptation)** is a parameter-efficient fine-tuning method where we keep the **base model frozen** and train a small **adapter** that represents the domain-specific change in behavior.
+
+In this project, LoRA is the “improvement step”:
+- **Baseline** = CodeLlama (unchanged foundation model)
+- **After tuning** = CodeLlama + a small LoRA adapter (“HPC skill pack”)
+- Benefit: fast training, lower GPU memory, and modular adapters (e.g., Slurm vs MPI vs Spack).
+
+If VRAM is limited, use **QLoRA** (LoRA with 4-bit quantized base weights) to make tuning practical on smaller GPUs.
+
+---
+
 ## Suggested demo question
 “What is the Slurm `srun` command to start an interactive session? Give a minimal example and one requesting 4 CPUs and 16GB for 1 hour.”
 
@@ -19,6 +31,7 @@ This is meant to be a demo artifact (clear narrative + reproducible steps), not 
 - Uses `srun --pty bash`
 - Provides a resource-request example: `-t`, `-c`, `--mem`
 - Notes site-specific needs: `-p <partition>`, `-A <account>` (as caveats)
+- Avoids guessing site-specific partitions/accounts; uses placeholders.
 
 ---
 

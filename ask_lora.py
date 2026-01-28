@@ -68,7 +68,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run inference with a LoRA adapter.")
     parser.add_argument("adapter_path", help="Path to LoRA adapter (output of finetune)")
     parser.add_argument("question", help="User question/prompt")
-    parser.add_argument("--max-new-tokens", type=int, default=256)
+    parser.add_argument("--max-new-tokens", type=int, default=512)
     parser.add_argument("--min-new-tokens", type=int, default=0, help="Force at least N tokens before stopping")
     parser.add_argument("--use-4bit", action="store_true", help="Load base model in 4-bit")
     parser.add_argument("--debug", action="store_true", help="Enable verbose logging")

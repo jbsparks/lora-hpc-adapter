@@ -50,11 +50,14 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # Optional: install uv for faster installs
-# curl -LsSf https://astral.sh/uv/install.sh | sh
-# uv venv .venv
-# source .venv/bin/activate
-# uv pip install -r requirements.txt
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH=/home/users/${USER}/.local/bin
+uvx python@3.13.7 -m venv .venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
 ```
+
+If you want to see a Linux server setup and execution, see [pinoak](./PINOAK.md) markdown document.
 
 ## Data
 - `data_train.jsonl` / `data_train.json`: training set (HPC/Slurm/Spack).
