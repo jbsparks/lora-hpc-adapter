@@ -13,3 +13,6 @@ judge.json
 codellama-hpc-lora/
 lora-tiny/
 checkpoint-*/
+.env
+datasetgen/docs/
+datasetgen/out/

@@ -1,0 +1,29 @@
+hypothesis: "Use the following documents as sources, generate user-based use-cases and questions, then generate a concise validated single answer."
+topics:
+  slurm.interactive:
+    commands: ["srun", "salloc"]
+    quota: 12
+  slurm.discovery:
+    commands: ["sinfo", "squeue"]
+    quota: 10
+  slurm.batch:
+    commands: ["sbatch"]
+    quota: 8
+rules:
+  must_include:
+    - "use placeholders for partition/account"
+  must_avoid:
+    - "hard-coded -p/-A values"
+quotas:
+  L1: 18
+  L2: 10
+  L3: 4
+model:
+  generator: "openai"
+  judge: "stub"
+  openai_model: "gpt-4.1-mini"
+  openai_api_key: ""
+question_index: "out/q_index"
+answer_index: "out/a_index"
+question_limit: 25
+seed: 0

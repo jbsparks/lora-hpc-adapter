@@ -27,6 +27,13 @@ flowchart LR
   L --> J
   R[Rule checks<br/>judge_rules.json] --> J
   J --> O[JSON verdict<br/>judge.json]
+
+  subgraph DATA[Dataset sources]
+    S[SME-authored dataset<br/>data_train.jsonl]
+    D[DatasetGen synthetic pipeline<br/>datasetgen/]
+    S --> T
+    D --> T
+  end
 ```
 
 ## Setup
@@ -57,7 +64,7 @@ source .venv/bin/activate
 uv pip install -r requirements.txt
 ```
 
-If you want to see a Linux server setup and execution, see [pinoak](./PINOAK.md) markdown document.
+If you want to see a Linux server setup and execution, see the cluster example in [PINOAK.md](./PINOAK.md).
 
 ## Data
 - `data_train.jsonl` / `data_train.json`: training set (HPC/Slurm/Spack).
@@ -174,6 +181,29 @@ Example `judge_rules.json`:
 
 ## macOS M1 Pro quickstart (TinyLlama, chat-template)
 ```bash
+# 0) (Optional) Generate a synthetic dataset from public Slurm docs
+cd datasetgen
+cat <<'EOF' > .env
+OPENAI_API_KEY=sk-...
+EOF
+mkdir -p docs/questions docs/answers out
+curl -L https://slurm.schedmd.com/quickstart.html -o docs/questions/quickstart.html
+curl -L https://slurm.schedmd.com/quickstart_admin.html -o docs/questions/quickstart_admin.html
+curl -L https://slurm.schedmd.com/srun.html -o docs/answers/srun.html
+curl -L https://slurm.schedmd.com/salloc.html -o docs/answers/salloc.html
+curl -L https://slurm.schedmd.com/sbatch.html -o docs/answers/sbatch.html
+curl -L https://slurm.schedmd.com/sinfo.html -o docs/answers/sinfo.html
+curl -L https://slurm.schedmd.com/squeue.html -o docs/answers/squeue.html
+python -m datasetgen.cli ingest --input docs/questions --out out/q_corpus.jsonl
+python -m datasetgen.cli build-index --corpus out/q_corpus.jsonl --out out/q_index
+python -m datasetgen.cli ingest --input docs/answers --out out/a_corpus.jsonl
+python -m datasetgen.cli build-index --corpus out/a_corpus.jsonl --out out/a_index
+python -m datasetgen.cli generate --index out/q_index --hypothesis datasetgen.yaml --out out/candidates.jsonl --limit 25
+python -m datasetgen.cli curate --in out/candidates.jsonl --out out/train.jsonl --eval-out out/eval.jsonl --manifest out/manifest.jsonl --index out/a_index
+cp out/train.jsonl ../data_train.jsonl
+cp out/eval.jsonl ../data_eval.jsonl
+cd ..
+
 # 1) Baseline (M1-verified settings)
 python hpc_lora_cli.py baseline \
   --model-id TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
@@ -196,14 +226,14 @@ python hpc_lora_cli.py tuned \
 
 # 4) Judge (local cached model path + rule checks)
 python hpc_lora_cli.py judge \
-  --judge-model /Users/sparksjo/.cache/huggingface/hub/models--microsoft--phi-3-mini-4k-instruct/snapshots/0a67737cc96d2554230f90338b163bc6380a2a85 \
+  --judge-model /path/to/hf/cache/models--microsoft--phi-3-mini-4k-instruct/snapshots/<hash> \
   --local-files-only --use-chat-template --no-eos \
   --rule-check --rules-path judge_rules.json \
   --answer-a "$(cat baseline.txt)" --answer-b "$(cat tuned.txt)" --out judge.json
 ```
 Notes:
 - Update the judge snapshot path if your cache hash differs:
-  `ls /Users/sparksjo/.cache/huggingface/hub/models--microsoft--phi-3-mini-4k-instruct/snapshots`
+  `ls $HF_HOME/hub/models--microsoft--phi-3-mini-4k-instruct/snapshots`
 - Rule checks are question-specific and configured in `judge_rules.json` using `@` (must) and `~` (nice to have).
 
 ## Held-out checks (5–10 prompts)

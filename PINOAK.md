@@ -1,15 +1,15 @@
-# `pinoak` Use Case
+# HPC cluster use case (example)
 
 ## Select a node
 ```bash
-srun --network=single_node_vni  -p rhgriz512 --nodes=1 --exclusive --time=04:00:00 --pty bash
+srun --network=single_node_vni -p <partition> --nodes=1 --exclusive --time=04:00:00 --pty bash
 ```
 
 ## Setup the environment
 ```bash
-cd /lus/cflus02/jsparks/workarea/
+cd /path/to/workarea/
 mkdir LoRA && cd LoRA
-git clone  https://github.com/jbsparks/lora-hpc-adapter
+git clone https://github.com/example/lora-hpc-adapter
 cd lora-hpc-adapter
 ```
 
@@ -25,16 +25,16 @@ uv pip install -r requirements.txt
 Should have python set now
 ```bash
 which python
-/lus/cflus02/jsparks/workarea/LoRA/lora-hpc-adapter/.venv/bin/python
+/path/to/workarea/LoRA/lora-hpc-adapter/.venv/bin/python
 python --version
 Python 3.13.7
 ```
 
 ```bash
-mkdir -p /lus/cflus02/jsparks/.cache/huggingface
-export HF_HOME=/lus/cflus02/jsparks/.cache/huggingface
+mkdir -p /path/to/cache/huggingface
+export HF_HOME=/path/to/cache/huggingface
 # optional: keep Transformers cache consistent
-export TRANSFORMERS_CACHE=/lus/cflus02/jsparks/.cache/huggingface/hub
+export TRANSFORMERS_CACHE=/path/to/cache/huggingface/hub
 python hpc_lora_cli.py baseline --model-id codellama/CodeLlama-7b-Instruct-hf --out baseline.txt
 ```
 If you want to see the debug/progress simple add `--debug` and/or `--progress` to the CLI.
@@ -81,7 +81,9 @@ Note: replace <partition> and <account> with appropriate values for your site.
 
 ```bash
 
-python hpc_lora_cli.py judge     --judge-model $HF_HOME/hub/models--codellama--CodeLlama-7b-Instruct-hf/snapshots/22cb240e0292b0b5ab4c17ccd97aa3a2f799cbed     --answer-a "$(cat baseline.txt)" --answer-b "$(cat tuned.txt)" --out judge.json --debug
+python hpc_lora_cli.py judge \
+  --judge-model $HF_HOME/hub/models--codellama--CodeLlama-7b-Instruct-hf/snapshots/<hash> \
+  --answer-a "$(cat baseline.txt)" --answer-b "$(cat tuned.txt)" --out judge.json --debug
 ```
 
 Well ... just goes to show training can cause the opposite affect -- bad answers.
